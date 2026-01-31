@@ -116,10 +116,8 @@ jobs:
           set -euo pipefail
           cd "${SDK_DIR}"
           ./scripts/feeds update -a
-          # Install all feeds, but ignore errors from broken packages
-          set +e
-          ./scripts/feeds install -a
-          set -e
+          # Install all feeds, ignore errors from broken packages (e.g. mesa, xkeyboard-config)
+          ./scripts/feeds install -a || true
           make defconfig
 
       - name: Build all detected local packages

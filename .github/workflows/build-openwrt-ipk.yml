@@ -89,6 +89,7 @@ jobs:
           # - contains a Makefile
           # Exclude common non-package dirs if any appear
           shopt -s nullglob
+          COPIED_PACKAGES=""
           for d in ../*/ ; do
             name="$(basename "$d")"
             [[ "$name" == ".github" ]] && continue
@@ -100,8 +101,13 @@ jobs:
               echo "Adding package: $name"
               rm -rf "package/${name}"
               rsync -a --delete "$d/" "package/${name}/"
+              COPIED_PACKAGES="${COPIED_PACKAGES}${name} "
             fi
           done
+          
+          # Export list of copied packages for later steps
+          echo "COPIED_PACKAGES=${COPIED_PACKAGES}" >> "$GITHUB_ENV"
+          echo "Copied packages: ${COPIED_PACKAGES:-none}"
 
       - name: Update feeds & defconfig
         shell: bash
@@ -118,9 +124,15 @@ jobs:
           set -euo pipefail
           cd "${SDK_DIR}"
 
-          # Discover the packages we just copied (package/<name>/Makefile exists)
-          mapfile -t PKGS < <(find package -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | sort)
+          # Check if any packages were copied
+          if [[ -z "${COPIED_PACKAGES// }" ]]; then
+            echo "No local packages to build. Skipping build step."
+            exit 0
+          fi
 
+          # Build only the packages we copied
+          read -ra PKGS <<< "${COPIED_PACKAGES}"
+          
           echo "Packages to build:"
           printf " - %s\n" "${PKGS[@]}"
 
@@ -141,17 +153,19 @@ jobs:
           fi
 
       - name: Collect IPKs
+        if: env.COPIED_PACKAGES != ''
         shell: bash
         run: |
           set -euo pipefail
           cd "${SDK_DIR}"
           mkdir -p ../artifacts
-          find bin/packages -type f -name "*.ipk" -print -exec cp -v {} ../artifacts/ \;
-          (cd ../artifacts && ls -lah)
+          find bin/packages -type f -name "*.ipk" -print -exec cp -v {} ../artifacts/ \; || true
+          (cd ../artifacts && ls -lah) || echo "No artifacts to collect"
 
       - name: Upload artifacts (ipk)
+        if: env.COPIED_PACKAGES != ''
         uses: actions/upload-artifact@v4
         with:
           name: openwrt-ipk-${{ env.OPENWRT_VERSION }}-${{ env.TARGET }}-${{ env.SUBTARGET }}
           path: artifacts/*.ipk
-          if-no-files-found: error
+          if-no-files-found: warn

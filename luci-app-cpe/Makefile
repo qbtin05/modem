@@ -27,7 +27,7 @@ endef
  
 PKG_LICENSE:=GPLv3
 PKG_LICENSE_FILES:=LICENSE
-PKF_MAINTAINER:=daocaoren <168620188@qq.com>
+PKG_MAINTAINER:=daocaoren <168620188@qq.com>
 
 include $(TOPDIR)/feeds/luci/luci.mk
 # call BuildPackage - OpenWrt buildroot signature

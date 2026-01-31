@@ -9,7 +9,7 @@ LUCI_PKGARCH:=all
 PKG_VERSION:=1.4.4
 PKG_LICENSE:=GPLv3
 PKG_LICENSE_FILES:=LICENSE
-PKF_MAINTAINER:=Siriling <siriling@qq.com>
+PKG_MAINTAINER:=Siriling <siriling@qq.com>
 LUCI_DEPENDS:=+luci-compat \
 		+kmod-usb2 +kmod-usb3 \
 		+kmod-usb-net-sierrawireless +kmod-usb-ohci \

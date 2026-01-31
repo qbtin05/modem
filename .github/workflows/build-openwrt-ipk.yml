@@ -116,7 +116,8 @@ jobs:
           set -euo pipefail
           cd "${SDK_DIR}"
           ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          # Only install luci feed to avoid broken packages in other feeds
+          ./scripts/feeds install -p luci
           make defconfig
 
       - name: Build all detected local packages

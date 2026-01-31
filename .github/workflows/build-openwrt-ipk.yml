@@ -116,10 +116,9 @@ jobs:
           set -euo pipefail
           cd "${SDK_DIR}"
           ./scripts/feeds update -a
-          # Install all feeds but tolerate errors from problematic packages
-          # Some feeds may have circular dependencies or missing packages
-          # Capture output for debugging but don't fail the build
-          ./scripts/feeds install -a 2>&1 | tee feed_install.log || echo "Some feed packages failed to install, continuing..."
+          # Install base LuCI packages needed by our luci-app-* packages
+          # Don't use -a to avoid installing unrelated packages with unmet prerequisites
+          ./scripts/feeds install -p luci luci-base luci-compat
           make defconfig
 
       - name: Build all detected local packages

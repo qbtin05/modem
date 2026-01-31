@@ -115,7 +115,45 @@ jobs:
         run: |
           set -euo pipefail
           cd "${SDK_DIR}"
-          ./scripts/feeds update -a
+
+          # Retry logic for feeds update (OpenWrt git servers can be flaky)
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          LAST_OUTPUT=""
+
+          while (( RETRY_COUNT < MAX_RETRIES )); do
+            echo "Attempting feeds update (attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)..."
+
+            # Capture output to check for transient errors
+            if LAST_OUTPUT=$(./scripts/feeds update -a 2>&1); then
+              echo "Feeds update succeeded"
+              break
+            else
+              EXIT_CODE=$?
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+
+              # Check if error is likely transient (503, connection issues, RPC failures)
+              if echo "$LAST_OUTPUT" | grep -qE "(error[[:space:]]503|HTTP[[:space:]]503|RPC failed|hung up unexpectedly|Connection.*reset|timed out)"; then
+                if (( RETRY_COUNT < MAX_RETRIES )); then
+                  echo "Transient error detected, retrying in 10 seconds..."
+                  sleep 10
+                else
+                  echo "Feeds update failed after $MAX_RETRIES attempts with transient errors"
+                  echo "Last output:"
+                  echo "$LAST_OUTPUT"
+                  exit 1
+                fi
+              else
+                # Non-transient error, fail immediately
+                echo "Feeds update failed with non-transient error (exit code $EXIT_CODE)"
+                echo "Output:"
+                echo "$LAST_OUTPUT"
+                # Ensure we exit with a non-zero code
+                exit ${EXIT_CODE:-1}
+              fi
+            fi
+          done
+
           ./scripts/feeds install -a
           make defconfig
 

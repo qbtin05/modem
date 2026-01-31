@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       openwrt_version:
-        description: "OpenWrt release dir (e.g. 25.12.0-rc3, 25.12.0-rc2)"
+        description: "OpenWrt release dir (e.g. 24.10.0, 23.05.5)"
         required: true
-        default: "25.12.0-rc3"
+        default: "24.10.0"
       target:
         description: "OpenWrt target (e.g. rockchip)"
         required: true
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      OPENWRT_VERSION: ${{ inputs.openwrt_version || '25.12.0-rc3' }}
+      OPENWRT_VERSION: ${{ inputs.openwrt_version || '24.10.0' }}
       TARGET: ${{ inputs.target || 'rockchip' }}
       SUBTARGET: ${{ inputs.subtarget || 'armv8' }}
 

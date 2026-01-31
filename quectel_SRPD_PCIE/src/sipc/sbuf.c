@@ -44,6 +44,13 @@
 #define VOLA_SBUF_SMEM volatile struct sbuf_smem_header
 #define VOLA_SBUF_RING volatile struct sbuf_ring_header
 
+/* Helper macro to access task state across different kernel versions */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 14, 0))
+#define TASK_STATE(task) READ_ONCE((task)->__state)
+#else
+#define TASK_STATE(task) ((task)->state)
+#endif
+
 struct name_node {
 	struct	list_head list;
 	char	comm[TASK_COMM_LEN];
@@ -1485,7 +1492,7 @@ void sbuf_get_status(u8 dst, char *status_info, int size)
 					 "%s %d: %s, state=0x%lx, pid=%d.\n",
 					 phead,
 					 cnt, task->comm,
-					 task->state, task->pid);
+					 TASK_STATE(task), task->pid);
 				cnt++;
 				len = strlen(status_info);
 			}
@@ -1569,7 +1576,7 @@ static void sbuf_debug_task_show(struct seq_file *m,
 				   cnt);
 			seq_printf(m, ": %s, state = 0x%lx, pid = %d\n",
 				   task->comm,
-				   task->state,
+				   TASK_STATE(task),
 				   task->pid);
 			cnt++;
 		}

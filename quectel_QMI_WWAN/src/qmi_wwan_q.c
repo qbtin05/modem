@@ -284,6 +284,17 @@ static int is_qmap_netdev(const struct net_device *netdev);
 static const struct driver_info rmnet_usb_info;
 
 #ifdef QUECTEL_UL_DATA_AGG
+typedef struct {
+    unsigned int size;
+    unsigned int rx_urb_size;
+    unsigned int ep_type;
+    unsigned int iface_id;
+    unsigned int MuxId;
+    unsigned int ul_data_aggregation_max_datagrams; //0x17
+    unsigned int ul_data_aggregation_max_size ;//0x18
+    unsigned int dl_minimum_padding; //0x1A
+} QMAP_SETTING;
+
 int qma_setting_store(struct device *dev, QMAP_SETTING *qmap_settings, size_t size);
 #endif
 
@@ -1406,17 +1417,6 @@ static void qmap_unregister_device(sQmiWwanQmap * pDev, u8 offset_id) {
 		free_netdev(qmap_net);
 	}
 }
-
-typedef struct {
-    unsigned int size;
-    unsigned int rx_urb_size;
-    unsigned int ep_type;
-    unsigned int iface_id;
-    unsigned int MuxId;
-    unsigned int ul_data_aggregation_max_datagrams; //0x17
-    unsigned int ul_data_aggregation_max_size ;//0x18
-    unsigned int dl_minimum_padding; //0x1A
-} QMAP_SETTING;
 
 #ifdef CONFIG_BRIDGE_LAN
 typedef struct {

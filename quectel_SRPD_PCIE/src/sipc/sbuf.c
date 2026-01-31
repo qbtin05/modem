@@ -1485,7 +1485,11 @@ void sbuf_get_status(u8 dst, char *status_info, int size)
 					 "%s %d: %s, state=0x%lx, pid=%d.\n",
 					 phead,
 					 cnt, task->comm,
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 14, 0))
+					 READ_ONCE(task->__state), task->pid);
+#else
 					 task->state, task->pid);
+#endif
 				cnt++;
 				len = strlen(status_info);
 			}
@@ -1569,7 +1573,11 @@ static void sbuf_debug_task_show(struct seq_file *m,
 				   cnt);
 			seq_printf(m, ": %s, state = 0x%lx, pid = %d\n",
 				   task->comm,
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 14, 0))
+				   READ_ONCE(task->__state),
+#else
 				   task->state,
+#endif
 				   task->pid);
 			cnt++;
 		}

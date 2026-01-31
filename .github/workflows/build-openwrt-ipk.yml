@@ -9,7 +9,7 @@ on:
       openwrt_version:
         description: "OpenWrt release dir (e.g. 24.10.0, 23.05.5)"
         required: true
-        default: "24.10.0"
+        default: "24.10.5"
       target:
         description: "OpenWrt target (e.g. rockchip)"
         required: true

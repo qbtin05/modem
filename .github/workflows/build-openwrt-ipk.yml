@@ -106,6 +106,7 @@ jobs:
           done
           
           # Export list of copied packages for later steps
+          COPIED_PACKAGES="${COPIED_PACKAGES% }"  # Trim trailing space
           echo "COPIED_PACKAGES=${COPIED_PACKAGES}" >> "$GITHUB_ENV"
           echo "Copied packages: ${COPIED_PACKAGES:-none}"
 
@@ -125,7 +126,7 @@ jobs:
           cd "${SDK_DIR}"
 
           # Check if any packages were copied
-          if [[ -z "${COPIED_PACKAGES// }" ]]; then
+          if [[ -z "${COPIED_PACKAGES}" ]]; then
             echo "No local packages to build. Skipping build step."
             exit 0
           fi

@@ -49,7 +49,7 @@ jobs:
           echo "BASE_URL=$BASE_URL"
 
           # Find the SDK tarball name from sha256sums (more robust than hardcoding gcc/musl versions)
-          SDK_FILE="$(curl -fsSL "${BASE_URL}sha256sums" | awk '/openwrt-sdk-.*Linux-x86_64\.tar\.(zst|xz)$/{print $2; exit}')"
+          SDK_FILE="$(curl -fsSL "${BASE_URL}sha256sums" | awk '/openwrt-sdk-.*Linux-x86_64\.tar\.(zst|xz)$/{sub(/^\*/, "", $2); print $2; exit}')"
           if [[ -z "${SDK_FILE}" ]]; then
             echo "ERROR: Could not find SDK tarball in sha256sums at: ${BASE_URL}"
             exit 1
@@ -61,7 +61,7 @@ jobs:
           curl -fL "${BASE_URL}sha256sums" -o "sha256sums"
 
           # Verify checksum
-          grep " ${SDK_FILE}$" sha256sums | sha256sum -c -
+          grep " \*\?${SDK_FILE}$" sha256sums | sha256sum -c -
 
       - name: Extract SDK
         shell: bash

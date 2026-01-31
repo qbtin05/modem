@@ -133,7 +133,7 @@ jobs:
               RETRY_COUNT=$((RETRY_COUNT + 1))
 
               # Check if error is likely transient (503, connection issues, RPC failures)
-              if echo "$LAST_OUTPUT" | grep -qE "(503|RPC failed|hung up unexpectedly|Connection.*reset|timed out)"; then
+              if echo "$LAST_OUTPUT" | grep -qE "(error.*503|HTTP 503|RPC failed|hung up unexpectedly|Connection.*reset|timed out)"; then
                 if (( RETRY_COUNT < MAX_RETRIES )); then
                   echo "Transient error detected, retrying in 10 seconds..."
                   sleep 10
@@ -148,7 +148,8 @@ jobs:
                 echo "Feeds update failed with non-transient error (exit code $EXIT_CODE)"
                 echo "Output:"
                 echo "$LAST_OUTPUT"
-                exit $EXIT_CODE
+                # Ensure we exit with a non-zero code
+                exit ${EXIT_CODE:-1}
               fi
             fi
           done

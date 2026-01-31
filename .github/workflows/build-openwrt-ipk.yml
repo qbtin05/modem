@@ -1,0 +1,156 @@
+name: Build OpenWrt IPKs (SDK)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      openwrt_version:
+        description: "OpenWrt release dir (e.g. 25.12.0-rc3, 25.12.0-rc2)"
+        required: true
+        default: "25.12.0-rc3"
+      target:
+        description: "OpenWrt target (e.g. rockchip)"
+        required: true
+        default: "rockchip"
+      subtarget:
+        description: "OpenWrt subtarget (e.g. armv8)"
+        required: true
+        default: "armv8"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      OPENWRT_VERSION: ${{ inputs.openwrt_version || '25.12.0-rc3' }}
+      TARGET: ${{ inputs.target || 'rockchip' }}
+      SUBTARGET: ${{ inputs.subtarget || 'armv8' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install host deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential gawk gcc-multilib flex bison gettext \
+            libncurses-dev libssl-dev python3 python3-distutils \
+            rsync unzip file wget curl ca-certificates zstd xz-utils
+
+      - name: Resolve SDK filename & download (with sha256 verify)
+        id: sdk
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_URL="https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/${TARGET}/${SUBTARGET}/"
+          echo "BASE_URL=$BASE_URL"
+
+          # Find the SDK tarball name from sha256sums (more robust than hardcoding gcc/musl versions)
+          SDK_FILE="$(curl -fsSL "${BASE_URL}sha256sums" | awk '/openwrt-sdk-.*Linux-x86_64\.tar\.(zst|xz)$/{print $2; exit}')"
+          if [[ -z "${SDK_FILE}" ]]; then
+            echo "ERROR: Could not find SDK tarball in sha256sums at: ${BASE_URL}"
+            exit 1
+          fi
+          echo "SDK_FILE=${SDK_FILE}"
+          echo "sdk_file=${SDK_FILE}" >> "$GITHUB_OUTPUT"
+
+          curl -fL "${BASE_URL}${SDK_FILE}" -o "${SDK_FILE}"
+          curl -fL "${BASE_URL}sha256sums" -o "sha256sums"
+
+          # Verify checksum
+          grep " ${SDK_FILE}$" sha256sums | sha256sum -c -
+
+      - name: Extract SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_FILE="${{ steps.sdk.outputs.sdk_file }}"
+          # tar.zst needs zstd; tar.xz needs xz-utils (installed above)
+          if [[ "${SDK_FILE}" == *.tar.zst ]]; then
+            tar -I zstd -xf "${SDK_FILE}"
+          else
+            tar -xf "${SDK_FILE}"
+          fi
+          SDK_DIR="$(ls -d openwrt-sdk-*/ | head -n1)"
+          echo "SDK_DIR=${SDK_DIR}" >> "$GITHUB_ENV"
+          echo "Using SDK_DIR=${SDK_DIR}"
+
+      - name: Copy local packages into SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${SDK_DIR}"
+
+          # Copy every top-level dir from this repo that looks like an OpenWrt package:
+          # - is a directory
+          # - contains a Makefile
+          # Exclude common non-package dirs if any appear
+          shopt -s nullglob
+          for d in ../*/ ; do
+            name="$(basename "$d")"
+            [[ "$name" == ".github" ]] && continue
+            [[ "$name" == ".git" ]] && continue
+            [[ "$name" == "docs" ]] && continue
+
+            if [[ -f "$d/Makefile" ]]; then
+              echo "Adding package: $name"
+              rm -rf "package/${name}"
+              rsync -a --delete "$d/" "package/${name}/"
+            fi
+          done
+
+      - name: Update feeds & defconfig
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${SDK_DIR}"
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          make defconfig
+
+      - name: Build all detected local packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${SDK_DIR}"
+
+          # Discover the packages we just copied (package/<name>/Makefile exists)
+          mapfile -t PKGS < <(find package -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | sort)
+
+          echo "Packages to build:"
+          printf " - %s\n" "${PKGS[@]}"
+
+          # Build each package; keep going to show which ones fail (optional)
+          FAILED=0
+          for p in "${PKGS[@]}"; do
+            echo "::group::build $p"
+            if ! make "package/${p}/compile" -j"$(nproc)" V=s; then
+              echo "FAILED: $p"
+              FAILED=1
+            fi
+            echo "::endgroup::"
+          done
+
+          if [[ "$FAILED" -ne 0 ]]; then
+            echo "One or more packages failed. Check logs above."
+            exit 1
+          fi
+
+      - name: Collect IPKs
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${SDK_DIR}"
+          mkdir -p ../artifacts
+          find bin/packages -type f -name "*.ipk" -print -exec cp -v {} ../artifacts/ \;
+          (cd ../artifacts && ls -lah)
+
+      - name: Upload artifacts (ipk)
+        uses: actions/upload-artifact@v4
+        with:
+          name: openwrt-ipk-${{ env.OPENWRT_VERSION }}-${{ env.TARGET }}-${{ env.SUBTARGET }}
+          path: artifacts/*.ipk
+          if-no-files-found: error

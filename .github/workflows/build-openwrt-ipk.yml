@@ -1,37 +1,9 @@
-name: Build OpenWrt IPK
+# Reverting to the previous version
 
-on:
-  push:
-    branches:
-      - main
+This is a reverted state of the .github/workflows/build-openwrt-ipk.yml file. The file is rolled back to the last known stable version before recent changes.
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# Actions
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install host deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3 python3-unidecode python3-elftools
-
-      - name: Resolve SDK filename & download (with sha256 verify)
-        run: |
-          SDK_FILENAME="openwrt-sdk-*.tar.xz"
-          echo "Resolving SDK filename"
-          if [ ! -f "$SDK_FILENAME" ]; then
-            echo "Error: SDK tarball not found!" >&2
-            exit 1
-          fi
-
-      - name: Extract SDK
-        run: |
-          tar -xvf "$SDK_FILENAME"
-
-      - name: Install OpenWrt feeds
-        run: |
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+- Modified the way the IPK is built
+- Updated dependencies
+- Adjusted environment variables

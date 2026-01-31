@@ -31,7 +31,7 @@ dhcp: clean
 
 ndhcp: clean
 	$(CC) $(CFLAGS) -Wall -s ${SRC} ${FB_NDHCP} -o fibocom-dial -lpthread -ldl
-	$(CC) -Wall -s  multi-pdn-manager.c   query_pcie_mode.cutil.c -o multi-pdn-manager -lpthread -ldl
+	$(CC) -Wall -s  multi-pdn-manager.c   query_pcie_mode.c util.c -o multi-pdn-manager -lpthread -ldl
 	$(CC) -Wall -s ${FIBO_PROXY_SRC} -o fibo_qmimsg_server -lpthread -ldl
 
 qmi-proxy:

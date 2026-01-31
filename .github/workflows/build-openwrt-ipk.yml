@@ -116,7 +116,10 @@ jobs:
           set -euo pipefail
           cd "${SDK_DIR}"
           ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          # Install only essential feeds (luci, packages) instead of all packages from all feeds
+          # This prevents failures from circular dependencies or missing packages
+          ./scripts/feeds install -p luci
+          ./scripts/feeds install -p packages
           make defconfig
 
       - name: Build all detected local packages

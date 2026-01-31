@@ -283,6 +283,10 @@ static int is_qmap_netdev(const struct net_device *netdev);
 
 static const struct driver_info rmnet_usb_info;
 
+#ifdef QUECTEL_UL_DATA_AGG
+int qma_setting_store(struct device *dev, QMAP_SETTING *qmap_settings, size_t size);
+#endif
+
 #ifdef QUECTEL_BRIDGE_MODE
 static int bridge_arp_reply(struct net_device *net, struct sk_buff *skb, uint bridge_ipv4) {
     struct arphdr *parp;
@@ -1949,8 +1953,10 @@ static void ql_net_get_drvinfo(struct net_device *net, struct ethtool_drvinfo *i
 {
 	/* Inherit standard device info */
 	usbnet_get_drvinfo(net, info);
-	strlcpy(info->driver, driver_name, sizeof(info->driver));
-	strlcpy(info->version, VERSION_NUMBER, sizeof(info->version));
+	strncpy(info->driver, driver_name, sizeof(info->driver) - 1);
+	info->driver[sizeof(info->driver) - 1] = '\0';
+	strncpy(info->version, VERSION_NUMBER, sizeof(info->version) - 1);
+	info->version[sizeof(info->version) - 1] = '\0';
 }
 
 static struct ethtool_ops ql_net_ethtool_ops;

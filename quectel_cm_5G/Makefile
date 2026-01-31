@@ -7,7 +7,7 @@ PKG_RELEASE:=1
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/quectel-open-source/Quectel_QConnectManager_Linux
 PKG_SOURCE_VERSION:=4dd7951dd9cbd078fbe50221d93ed098f7e38289
-PKG_MIRROR_HASH:=9c864c75b7ff0e3e60c5d515ab4521194b0c6642eb636e88f6e0ace630b9c54b
+PKG_MIRROR_HASH:=774d73c4b9e668dfacfe45a76b03b3cfa01de807041ff2e50a431d3803d32e93
 
 include $(INCLUDE_DIR)/package.mk
 

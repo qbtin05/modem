@@ -116,9 +116,9 @@ jobs:
           set -euo pipefail
           cd "${SDK_DIR}"
           ./scripts/feeds update -a
-          # Install base LuCI packages needed by our luci-app-* packages
-          # Don't use -a to avoid installing unrelated packages with unmet prerequisites
-          ./scripts/feeds install -p luci luci-base luci-compat
+          # Install specific LuCI packages needed by our luci-app-* packages
+          # Install luci-base and luci-compat which provide the framework
+          ./scripts/feeds install luci-base luci-compat
           make defconfig
 
       - name: Build all detected local packages

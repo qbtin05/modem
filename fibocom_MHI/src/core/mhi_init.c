@@ -1189,7 +1189,7 @@ static int mhi_match(struct device *dev, struct device_driver *drv)
 	struct mhi_driver *mhi_drv = to_mhi_driver(drv);
 	const struct mhi_device_id *id;
 
-	for (id = mhi_drv->id_table; id->chan != NULL && id->chan[0] != '\0'; id++) {
+	for (id = mhi_drv->id_table; id->chan[0] != '\0'; id++) {
 		if (!strcmp(mhi_dev->chan_name, id->chan)) {
 			mhi_dev->id = id;
 			return 1;

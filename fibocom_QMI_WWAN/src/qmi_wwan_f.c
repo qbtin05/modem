@@ -1187,7 +1187,7 @@ static int qmap_register_device(sQmiWwanQmap * pDev, u8 offset_id)
     priv->mux_id = FIBOCOM_QMAP_MUX_ID + offset_id;
     sprintf(qmap_net->name, "%s.%d", real_dev->name, offset_id + 1);
     qmap_net->netdev_ops = &qmap_netdev_ops;
-    memcpy (qmap_net->dev_addr, real_dev->dev_addr, ETH_ALEN);
+    dev_addr_set(qmap_net, real_dev->dev_addr);
 
 #ifdef FIBOCOM_BRIDGE_MODE
     priv->bridge_mode = !!(pDev->bridge_mode & BIT(offset_id));

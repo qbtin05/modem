@@ -94,6 +94,7 @@ jobs:
             [[ "$name" == ".github" ]] && continue
             [[ "$name" == ".git" ]] && continue
             [[ "$name" == "docs" ]] && continue
+            [[ "$name" == openwrt-sdk-* ]] && continue
 
             if [[ -f "$d/Makefile" ]]; then
               echo "Adding package: $name"

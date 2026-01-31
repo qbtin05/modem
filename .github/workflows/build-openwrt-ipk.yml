@@ -154,7 +154,8 @@ jobs:
             fi
           done
 
-          ./scripts/feeds install -a
+          # Allow feeds install to fail on broken feed packages since we only build local packages
+          ./scripts/feeds install -a || echo "Warning: Some feed packages failed to install (non-fatal)"
           make defconfig
 
       - name: Build all detected local packages

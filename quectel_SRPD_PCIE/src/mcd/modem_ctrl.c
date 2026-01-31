@@ -799,7 +799,11 @@ static struct platform_driver modem_ctrl_driver = {
 
 int modem_ctrl_init(void)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
+	modem_ctrl_class = class_create("modem_ctrl");
+#else
 	modem_ctrl_class = class_create(THIS_MODULE, "modem_ctrl");
+#endif
 	if (IS_ERR(modem_ctrl_class))
 		return PTR_ERR(modem_ctrl_class);
 	return platform_driver_register(&modem_ctrl_driver);

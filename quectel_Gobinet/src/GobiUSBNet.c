@@ -3149,7 +3149,11 @@ RETURN VALUE:
 ===========================================================================*/
 static int __init GobiUSBNetModInit( void )
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
+   gpClass = class_create( "GobiQMI" );
+#else
    gpClass = class_create( THIS_MODULE, "GobiQMI" );
+#endif
    if (IS_ERR( gpClass ) == true)
    {
       DBG( "error at class_create %ld\n", PTR_ERR( gpClass ) );

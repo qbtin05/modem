@@ -439,7 +439,11 @@ int spipe_init(void)
 {
 	int ret;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
+	spipe_class = class_create("spipe");
+#else
 	spipe_class = class_create(THIS_MODULE, "spipe");
+#endif
 	if (IS_ERR(spipe_class))
 		return PTR_ERR(spipe_class);
 #ifndef SPRD_PCIE_USE_DTS

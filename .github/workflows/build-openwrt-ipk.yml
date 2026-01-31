@@ -61,7 +61,7 @@ jobs:
           curl -fL "${BASE_URL}sha256sums" -o "sha256sums"
 
           # Verify checksum
-          grep " \*\?${SDK_FILE}$" sha256sums | sha256sum -c -
+          grep -E " \*?${SDK_FILE}$" sha256sums | sha256sum -c -
 
       - name: Extract SDK
         shell: bash

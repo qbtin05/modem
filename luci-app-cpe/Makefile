@@ -26,7 +26,7 @@ define Package/luci-app-cpe
 endef
  
 PKG_LICENSE:=GPLv3
-PKG_LINCESE_FILES:=LICENSE
+PKG_LICENSE_FILES:=LICENSE
 PKF_MAINTAINER:=daocaoren <168620188@qq.com>
 
 include $(TOPDIR)/feeds/luci/luci.mk

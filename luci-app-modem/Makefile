@@ -8,7 +8,7 @@ LUCI_TITLE:=LuCI support for Modem
 LUCI_PKGARCH:=all
 PKG_VERSION:=1.4.4
 PKG_LICENSE:=GPLv3
-PKG_LINCESE_FILES:=LICENSE
+PKG_LICENSE_FILES:=LICENSE
 PKF_MAINTAINER:=Siriling <siriling@qq.com>
 LUCI_DEPENDS:=+luci-compat \
 		+kmod-usb2 +kmod-usb3 \

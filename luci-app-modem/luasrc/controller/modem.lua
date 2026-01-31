@@ -751,7 +751,7 @@ function getQuickCommands()
 	end)
 
 	--未适配模组时，快捷命令选项为自定义
-	if manufacturer=="unknown" or manufacturer=="unknown" then
+	if manufacturer=="unknown" then
 		quick_option="custom"
 	end
 

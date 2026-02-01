@@ -744,13 +744,22 @@ static int sipa_eth_probe(struct platform_device *pdev)
 	netdev->irq = 0;
 	netdev->dma = 0;
 	netdev->features &= ~(NETIF_F_IP_CSUM | NETIF_F_IPV6_CSUM | NETIF_F_HW_CSUM);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
+	eth_hw_addr_random(netdev);
+#else
 	random_ether_addr(netdev->dev_addr);
+#endif
         netdev->sysfs_groups[0] = &sipa_eth_attribute_group;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0))
+	netif_napi_add(netdev, &sipa_eth->napi, sipa_eth_rx_poll_handler);
+	sipa_eth->napi.weight = SIPA_ETH_NAPI_WEIGHT;
+#else
 	netif_napi_add(netdev,
 		       &sipa_eth->napi,
 		       sipa_eth_rx_poll_handler,
 		       SIPA_ETH_NAPI_WEIGHT);
+#endif
 
 	/* Register new Ethernet interface */
 	ret = register_netdev(netdev);

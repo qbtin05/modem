@@ -18,6 +18,7 @@
 #include <linux/poll.h>
 #include <linux/platform_device.h>
 #include <linux/slab.h>
+#include <linux/version.h>
 
 #include "../include/sipc.h"
 #include "sipc_priv.h"

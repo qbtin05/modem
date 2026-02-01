@@ -69,7 +69,6 @@ struct sk_buff *qmi_wwan_tx_fixup(struct usbnet *dev, struct sk_buff *skb, gfp_t
 	return NULL;
 }
 #endif
-#include <linux/version.h>
 
 #define VERSION_NUMBER "V1.0.1"
 #define MEIG_WWAN_VERSION "Meig_QMI_WWAN_Driver_"VERSION_NUMBER

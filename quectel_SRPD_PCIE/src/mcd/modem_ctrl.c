@@ -26,6 +26,7 @@
 #include <linux/seq_file.h>
 #include <linux/gpio/consumer.h>
 #include <linux/reboot.h>
+#include <linux/version.h>
 #ifdef CONFIG_PCIE_PM_NOTIFY
 #include <linux/pcie_notifier.h>
 #endif

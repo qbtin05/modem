@@ -322,7 +322,7 @@ static int QMIWDASetDataFormat( sGobiUSBNet * pDev, int qmap_mode, int *rx_urb_s
 
 // Print Hex data, for debug purposes
 void QuecPrintHex(
-   void *         pBuffer,
+   const void *   pBuffer,
    u16            bufSize );
 
 // Sets mDownReason and turns carrier off

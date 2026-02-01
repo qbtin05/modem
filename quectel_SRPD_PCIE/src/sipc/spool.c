@@ -18,6 +18,7 @@
 #include <linux/poll.h>
 #include <linux/slab.h>
 #include <linux/of_device.h>
+#include <linux/version.h>
 
 #include "../include/sipc.h"
 #include "spool.h"

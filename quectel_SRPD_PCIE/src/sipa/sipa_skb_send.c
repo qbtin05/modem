@@ -289,7 +289,11 @@ static int sipa_free_thread(void *data)
 	enum sipa_cmn_fifo_index id = sender->ep->send_fifo->fifo_id;
     unsigned long flags;
 	struct sipa_nic *iter, *_iter;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+	sched_set_fifo_low(current);
+#else
 	sched_setscheduler(current, SCHED_RR, &param);
+#endif
 
 	while (!kthread_should_stop()) {
 		wait_event_interruptible(sender->free_waitq,

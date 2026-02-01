@@ -765,7 +765,11 @@ int sbuf_create(u8 dst, u8 channel, u32 bufnum, u32 txbufsize, u32 rxbufsize)
 	sbufs[dst][ch_index] = sbuf;
 
 	/*set the thread as a real time thread, and its priority is 10*/
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+	sched_set_fifo(sbuf->thread);
+#else
 	sched_setscheduler(sbuf->thread, SCHED_FIFO, &param);
+#endif
 	wake_up_process(sbuf->thread);
 
 	return 0;

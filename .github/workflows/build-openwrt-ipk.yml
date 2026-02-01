@@ -49,11 +49,19 @@ jobs:
           echo "BASE_URL=$BASE_URL"
 
           # Find the SDK tarball name from sha256sums (more robust than hardcoding gcc/musl versions)
-          SDK_FILE="$(curl -fsSL "${BASE_URL}sha256sums" | awk '/openwrt-sdk-.*Linux-x86_64\.tar\.(zst|xz)$/{sub(/^\*/, "", $2); print $2; exit}')"
+          # Ensure SDK_FILE matches the target and subtarget specified
+          SDK_FILE="$(curl -fsSL "${BASE_URL}sha256sums" | awk -v target="${TARGET}" -v subtarget="${SUBTARGET}" '/openwrt-sdk-.*Linux-x86_64\.tar\.(zst|xz)$/{sub(/^\*/, "", $2); if ($2 ~ "openwrt-sdk-[^-]+-"target"-"subtarget"_") {print $2; exit}}')"
           if [[ -z "${SDK_FILE}" ]]; then
-            echo "ERROR: Could not find SDK tarball in sha256sums at: ${BASE_URL}"
+            echo "ERROR: Could not find SDK tarball matching target '${TARGET}' and subtarget '${SUBTARGET}' in sha256sums at: ${BASE_URL}"
             exit 1
           fi
+          
+          # Validate that SDK_FILE contains the target and subtarget
+          if [[ ! "${SDK_FILE}" =~ openwrt-sdk-[^-]+-${TARGET}-${SUBTARGET}_ ]]; then
+            echo "ERROR: SDK_FILE '${SDK_FILE}' does not match expected target '${TARGET}' and subtarget '${SUBTARGET}'"
+            exit 1
+          fi
+          
           echo "SDK_FILE=${SDK_FILE}"
           echo "sdk_file=${SDK_FILE}" >> "$GITHUB_OUTPUT"
 

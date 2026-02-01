@@ -154,7 +154,24 @@ jobs:
             fi
           done
 
-          ./scripts/feeds install -a
+          # Install packages from available feeds
+          # Note: SDK may not have all feeds (e.g., luci), so we check exit status
+          if ! ./scripts/feeds install -a; then
+            echo "Warning: feeds install reported errors. Checking if critical..."
+            # If no feeds directory exists at all, that's a real error
+            if [ ! -d "feeds" ]; then
+              echo "ERROR: feeds directory does not exist!"
+              exit 1
+            fi
+            # Check if any feeds were actually installed (look for index files)
+            INSTALLED_FEEDS=$(find feeds/ -maxdepth 2 -name "*.index" -type f 2>/dev/null | wc -l)
+            if [ "$INSTALLED_FEEDS" -eq 0 ]; then
+              echo "ERROR: No feed index files found - feeds install completely failed!"
+              exit 1
+            fi
+            echo "Some feeds missing but $INSTALLED_FEEDS feed(s) were installed successfully"
+          fi
+
           make defconfig
 
       - name: Build all detected local packages

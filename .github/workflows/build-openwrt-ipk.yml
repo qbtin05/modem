@@ -211,8 +211,9 @@ jobs:
               cat "$BUILD_LOG"
               
               # Check if failure was due to missing dependencies
-              if grep -qE "Package .* is missing dependencies|dependency .* not met|ERROR: package/.*/compile failed" "$BUILD_LOG" && \
-                 grep -qE "kmod-|luci-proto-|luci-compat" "$BUILD_LOG"; then
+              # OpenWrt typically shows: "Package foo depends on bar which is not available in the repository"
+              # or build system exits early without actual compilation errors
+              if grep -qE "depends on .* which is not available|Package .* is missing|Makefile.*has a dependency on.*which does not exist" "$BUILD_LOG"; then
                 echo "SKIPPED: $p (missing dependencies in SDK)"
                 SKIPPED_PACKAGES+=("$p")
               else

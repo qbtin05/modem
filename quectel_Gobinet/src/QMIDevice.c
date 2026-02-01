@@ -330,7 +330,7 @@ RETURN VALUE:
    None
 ===========================================================================*/
 void QuecPrintHex(
-   void *      pBuffer,
+   const void *      pBuffer,
    u16         bufSize )
 {
    char * pPrintBuf;

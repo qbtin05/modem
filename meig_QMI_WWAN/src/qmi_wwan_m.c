@@ -21,6 +21,10 @@
 #include <linux/usb/cdc-wdm.h>
 #include <linux/version.h>
 
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(5, 12, 0))
+#include <linux/wwan.h>
+#endif
+
 /* This driver supports wwan (3G/LTE/?) devices using a vendor
  * specific management protocol called Qualcomm MSM Interface (QMI) -
  * in addition to the more common AT commands over serial interface
@@ -233,8 +237,13 @@ static int qmi_wwan_register_subdriver(struct usbnet *dev)
 	atomic_set(&info->pmcount, 0);
 
 	/* register subdriver */
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(5, 12, 0))
+	subdriver = usb_cdc_wdm_register(info->control, &dev->status->desc,
+					 4096, WWAN_PORT_QMI, &qmi_wwan_cdc_wdm_manage_power);
+#else
 	subdriver = usb_cdc_wdm_register(info->control, &dev->status->desc,
 					 4096, &qmi_wwan_cdc_wdm_manage_power);
+#endif
 	if (IS_ERR(subdriver)) {
 		dev_err(&info->control->dev, "subdriver registration failed\n");
 		rv = PTR_ERR(subdriver);

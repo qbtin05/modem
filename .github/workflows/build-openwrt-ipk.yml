@@ -1,8 +1,6 @@
 name: Build OpenWrt IPKs (SDK)
 
 on:
-  push:
-    branches: ["main"]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -298,3 +296,12 @@ jobs:
           name: openwrt-ipk-${{ env.OPENWRT_VERSION }}-${{ env.TARGET }}-${{ env.SUBTARGET }}
           path: artifacts/*.ipk
           if-no-files-found: warn
+
+      - name: Publish IPKs to Release
+        if: startsWith(github.ref, 'refs/tags/') && env.COPIED_PACKAGES != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.ipk
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

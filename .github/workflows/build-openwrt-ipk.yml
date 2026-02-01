@@ -247,9 +247,11 @@ jobs:
           if-no-files-found: warn
 
       - name: Publish IPKs to Release
-        if: env.COPIED_PACKAGES != '' && startsWith(github.ref, 'refs/tags/')
+        if: env.COPIED_PACKAGES != ''
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: openwrt-${{ env.OPENWRT_VERSION }}-${{ env.TARGET }}-${{ env.SUBTARGET }}
+          name: OpenWrt ${{ env.OPENWRT_VERSION }} - ${{ env.TARGET }}/${{ env.SUBTARGET }}
           files: artifacts/*.ipk
           fail_on_unmatched_files: false
           overwrite_files: true

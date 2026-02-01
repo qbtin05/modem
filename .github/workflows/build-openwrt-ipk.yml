@@ -50,13 +50,14 @@ jobs:
 
           # Find the SDK tarball name from sha256sums (more robust than hardcoding gcc/musl versions)
           # Ensure SDK_FILE matches the target and subtarget specified
-          SDK_FILE="$(curl -fsSL "${BASE_URL}sha256sums" | awk -v target="${TARGET}" -v subtarget="${SUBTARGET}" '/openwrt-sdk-.*Linux-x86_64\.tar\.(zst|xz)$/{sub(/^\*/, "", $2); if ($2 ~ "openwrt-sdk-[^-]+-"target"-"subtarget"_") {print $2; exit}}')"
+          SDK_FILE="$(curl -fsSL "${BASE_URL}sha256sums" | awk -v target="${TARGET}" -v subtarget="${SUBTARGET}" '/openwrt-sdk-.*Linux-x86_64\.tar\.(zst|xz)$/{sub(/^\*/, "", $2); pattern="openwrt-sdk-[^-]+-"target"-"subtarget"_"; if ($2 ~ pattern) {print $2; exit}}')"
           if [[ -z "${SDK_FILE}" ]]; then
             echo "ERROR: Could not find SDK tarball matching target '${TARGET}' and subtarget '${SUBTARGET}' in sha256sums at: ${BASE_URL}"
             exit 1
           fi
           
-          # Validate that SDK_FILE contains the target and subtarget
+          # Additional validation: double-check SDK_FILE contains the target and subtarget
+          # This provides a safety net in case the awk pattern changes or behaves unexpectedly
           if [[ ! "${SDK_FILE}" =~ openwrt-sdk-[^-]+-${TARGET}-${SUBTARGET}_ ]]; then
             echo "ERROR: SDK_FILE '${SDK_FILE}' does not match expected target '${TARGET}' and subtarget '${SUBTARGET}'"
             exit 1

@@ -164,11 +164,12 @@ jobs:
               exit 1
             fi
             # Check if any feeds were actually installed (look for index files)
-            if ! find feeds/ -name "*.index" -type f | grep -q .; then
+            INSTALLED_FEEDS=$(find feeds/ -maxdepth 2 -name "*.index" -type f 2>/dev/null | wc -l)
+            if [ "$INSTALLED_FEEDS" -eq 0 ]; then
               echo "ERROR: No feed index files found - feeds install completely failed!"
               exit 1
             fi
-            echo "Some feeds missing but at least one feed was installed (expected with SDK)"
+            echo "Some feeds missing but $INSTALLED_FEEDS feed(s) were installed successfully"
           fi
 
           make defconfig

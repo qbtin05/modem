@@ -247,7 +247,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Publish IPKs to Release
-        if: env.COPIED_PACKAGES != ''
+        if: env.COPIED_PACKAGES != '' && github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: openwrt-${{ env.OPENWRT_VERSION }}-${{ env.TARGET }}-${{ env.SUBTARGET }}

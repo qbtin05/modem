@@ -155,8 +155,16 @@ jobs:
           done
 
           # Install packages from available feeds
-          # Note: SDK may not have all feeds (e.g., luci), so we ignore errors
-          ./scripts/feeds install -a || true
+          # Note: SDK may not have all feeds (e.g., luci), so we check exit status
+          if ! ./scripts/feeds install -a; then
+            echo "Warning: feeds install reported errors. Checking if critical..."
+            # If no feeds directory exists at all, that's a real error
+            if [ ! -d "feeds" ] || [ -z "$(ls -A feeds 2>/dev/null)" ]; then
+              echo "ERROR: No feeds available at all!"
+              exit 1
+            fi
+            echo "Some feeds missing but continuing (this is expected with SDK)"
+          fi
 
           make defconfig
 

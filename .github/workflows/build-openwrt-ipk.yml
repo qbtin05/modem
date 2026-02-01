@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      OPENWRT_VERSION: ${{ inputs.openwrt_version || '24.10.0' }}
+      OPENWRT_VERSION: ${{ inputs.openwrt_version || '24.10.5' }}
       TARGET: ${{ inputs.target || 'rockchip' }}
       SUBTARGET: ${{ inputs.subtarget || 'armv8' }}
 

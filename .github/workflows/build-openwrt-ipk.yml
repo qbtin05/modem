@@ -163,12 +163,12 @@ jobs:
               echo "ERROR: feeds directory does not exist!"
               exit 1
             fi
-            # If feeds directory is empty, that's also a real error
-            if [ -z "$(ls -A feeds 2>/dev/null)" ]; then
-              echo "ERROR: feeds directory is empty!"
+            # Check if any feeds were actually installed (look for index files)
+            if ! find feeds/ -name "*.index" -type f | grep -q .; then
+              echo "ERROR: No feed index files found - feeds install completely failed!"
               exit 1
             fi
-            echo "Some feeds missing but continuing (this is expected with SDK)"
+            echo "Some feeds missing but at least one feed was installed (expected with SDK)"
           fi
 
           make defconfig

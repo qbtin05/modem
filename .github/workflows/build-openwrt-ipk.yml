@@ -254,5 +254,6 @@ jobs:
           name: OpenWrt ${{ env.OPENWRT_VERSION }} - ${{ env.TARGET }}/${{ env.SUBTARGET }} (Build ${{ github.run_number }})
           files: artifacts/*.ipk
           fail_on_unmatched_files: false
+          prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

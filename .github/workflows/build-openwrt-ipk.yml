@@ -17,6 +17,9 @@ on:
         required: true
         default: "armv8"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-22.04

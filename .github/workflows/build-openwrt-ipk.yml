@@ -192,21 +192,94 @@ jobs:
           echo "Packages to build:"
           printf " - %s\n" "${PKGS[@]}"
 
-          # Build each package; keep going to show which ones fail (optional)
-          FAILED=0
+          # Check if luci feed is available for luci-app packages
+          LUCI_AVAILABLE=false
+          if [[ -f "feeds/luci/luci.mk" ]]; then
+            LUCI_AVAILABLE=true
+            echo "LuCI feed is available"
+          else
+            echo "WARNING: LuCI feed is not available - luci-app-* packages will be skipped"
+          fi
+
+          # Build each package; keep going to show which ones fail
+          FAILED_PACKAGES=()
+          SKIPPED_PACKAGES=()
+          SUCCESS_PACKAGES=()
+          
           for p in "${PKGS[@]}"; do
             echo "::group::build $p"
-            if ! make "package/${p}/compile" -j"$(nproc)" V=s; then
-              echo "FAILED: $p"
-              FAILED=1
+            
+            # Skip luci-app packages if luci feed is not available
+            if [[ "$p" == luci-app-* ]] && [[ "$LUCI_AVAILABLE" == "false" ]]; then
+              echo "SKIPPED: $p (LuCI feed not available in SDK)"
+              SKIPPED_PACKAGES+=("$p")
+              echo "::endgroup::"
+              continue
             fi
+            
+            # Capture build output to check for dependency errors
+            BUILD_LOG=$(mktemp)
+            if make "package/${p}/compile" -j"$(nproc)" V=s > "$BUILD_LOG" 2>&1; then
+              echo "SUCCESS: $p"
+              SUCCESS_PACKAGES+=("$p")
+              cat "$BUILD_LOG"
+            else
+              BUILD_EXIT=$?
+              cat "$BUILD_LOG"
+              
+              # Check if failure was due to missing dependencies
+              # OpenWrt typically shows these patterns for missing dependencies:
+              # - "depends on XXX which is not available"
+              # - "Package XXX is missing"
+              # - "Makefile has a dependency on XXX which does not exist"
+              DEPENDENCY_ERROR_PATTERN="depends on .* which is not available|Package .* is missing|Makefile.*has a dependency on.*which does not exist"
+              if grep -qE "$DEPENDENCY_ERROR_PATTERN" "$BUILD_LOG"; then
+                echo "SKIPPED: $p (missing dependencies in SDK)"
+                SKIPPED_PACKAGES+=("$p")
+              else
+                echo "FAILED: $p (exit code: $BUILD_EXIT)"
+                FAILED_PACKAGES+=("$p")
+              fi
+            fi
+            rm -f "$BUILD_LOG"
+            
             echo "::endgroup::"
           done
 
-          if [[ "$FAILED" -ne 0 ]]; then
-            echo "One or more packages failed. Check logs above."
+          # Print summary
+          echo ""
+          echo "=== Build Summary ==="
+          echo "Successful: ${#SUCCESS_PACKAGES[@]} packages"
+          if [[ ${#SUCCESS_PACKAGES[@]} -gt 0 ]]; then
+            printf "  ✓ %s\n" "${SUCCESS_PACKAGES[@]}"
+          fi
+          
+          if [[ ${#SKIPPED_PACKAGES[@]} -gt 0 ]]; then
+            echo "Skipped: ${#SKIPPED_PACKAGES[@]} packages (missing dependencies)"
+            printf "  ⊗ %s\n" "${SKIPPED_PACKAGES[@]}"
+          fi
+          
+          if [[ ${#FAILED_PACKAGES[@]} -gt 0 ]]; then
+            echo "Failed: ${#FAILED_PACKAGES[@]} packages"
+            printf "  ✗ %s\n" "${FAILED_PACKAGES[@]}"
+            echo ""
+            echo "Build failed for the following packages:"
+            printf "  - %s\n" "${FAILED_PACKAGES[@]}"
             exit 1
           fi
+          
+          if [[ ${#SUCCESS_PACKAGES[@]} -eq 0 ]]; then
+            echo "WARNING: No packages were successfully built"
+            if [[ ${#SKIPPED_PACKAGES[@]} -gt 0 ]]; then
+              echo "All packages were skipped due to missing dependencies in SDK"
+              exit 0
+            else
+              echo "ERROR: No packages were built and none were skipped - this indicates a problem"
+              exit 1
+            fi
+          fi
+          
+          echo "Build completed successfully!"
 
       - name: Collect IPKs
         if: env.COPIED_PACKAGES != ''

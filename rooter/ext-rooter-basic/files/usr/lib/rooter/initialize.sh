@@ -285,9 +285,9 @@ echo "0" > /tmp/bootend.file
 
 /etc/init.d/dnsmasq restart
 
-chown -R root:root /etc/dropbear/
-chmod 700 /etc/dropbear/
-chmod 644 /etc/dropbear/authorized_keys 2>/dev/null
+chown -R root:root /etc/dropbear/ 2>/dev/null || true
+chmod 700 /etc/dropbear/ 2>/dev/null || true
+chmod 644 /etc/dropbear/authorized_keys 2>/dev/null || true
 
 if [ ! -z $tone ]; then
 	[ -e /etc/newstyle ] || touch /etc/newstyle

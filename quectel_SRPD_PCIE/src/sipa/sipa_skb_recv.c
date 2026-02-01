@@ -498,7 +498,11 @@ static int fill_recv_thread(void *data)
 	struct sched_param param = {.sched_priority = 92};
 	unsigned long flags;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+	sched_set_fifo(current);
+#else
 	sched_setscheduler(current, SCHED_RR, &param);
+#endif
 
 	while (!kthread_should_stop()) {
 		ret = wait_event_interruptible(receiver->fill_recv_waitq,

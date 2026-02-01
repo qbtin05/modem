@@ -919,7 +919,11 @@ int sblock_create_ex(u8 dst, u8 channel,
 			}
 		}
 		/*set the thread as a real time thread, and its priority is 11*/
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+		sched_set_fifo_low(sblock->thread);
+#else
 		sched_setscheduler(sblock->thread, SCHED_RR, &param);
+#endif
 		wake_up_process(sblock->thread);
 	}
 
@@ -998,7 +1002,11 @@ int sblock_pcfg_create(u8 dst, u8 channel,
 		 * Set the thread as a real time thread, and its priority
 		 * is 11.
 		 */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+		sched_set_fifo_low(sblock->thread);
+#else
 		sched_setscheduler(sblock->thread, SCHED_RR, &param);
+#endif
 		wake_up_process(sblock->thread);
 	}
 
@@ -1131,7 +1139,11 @@ int sblock_pcfg_open(uint8_t dest, uint8_t channel,
 		sblock->handler = notifier;
 		sblock->data = client;
 		/*set the thread as a real time thread, and its priority is 11*/
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+		sched_set_fifo_low(sblock->thread);
+#else
 		sched_setscheduler(sblock->thread, SCHED_RR, &param);
+#endif
 		wake_up_process(sblock->thread);
 	}
 

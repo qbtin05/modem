@@ -971,7 +971,7 @@ static void *qmi_proxy_loop(void *param)
     struct qlistnode *con_node;
     QMI_PROXY_CONNECTION *qmi_con;
 
-    dprintf("%s enter thread_id %ld\n", __func__, pthread_self());
+    dprintf("%s enter thread_id %ld\n", __func__, (unsigned long)pthread_self());
 
     qlist_init(&qmi_proxy_connection);
     qlist_init(&qmi_proxy_ctl_msg);
@@ -1102,7 +1102,7 @@ qmi_proxy_loop_exit:
         cleanup_qmi_connection(qmi_con->ClientFd);
     }
     
-    dprintf("%s exit, thread_id %ld\n", __func__, pthread_self());
+    dprintf("%s exit, thread_id %ld\n", __func__, (unsigned long)pthread_self());
 
     return NULL;
 }

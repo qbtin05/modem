@@ -45,10 +45,13 @@ All packages are automatically detected and built by the GitHub Actions workflow
 The workflow:
 1. Downloads the OpenWrt SDK for the specified target
 2. Copies packages with top-level Makefiles into the SDK
-3. Builds all packages
-4. Uploads the resulting IPK files as artifacts
+3. Configures the SDK (without updating external feeds)
+4. Builds only local packages
+5. Uploads the resulting IPK files as artifacts
 
-**Note**: The `rooter` directory structure is different and contains packages in subdirectories. If you need to build specific rooter sub-packages, they should be copied individually to the top level or the build workflow should be modified.
+**Note**: 
+- The workflow builds **only local packages** without downloading external dependencies. Packages requiring external feeds (e.g., luci-app-* packages requiring LuCI) will be skipped.
+- The `rooter` directory structure is different and contains packages in subdirectories. If you need to build specific rooter sub-packages, they should be copied individually to the top level or the build workflow should be modified.
 
 ## Usage
 

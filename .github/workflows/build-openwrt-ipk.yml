@@ -192,6 +192,15 @@ jobs:
           echo "Packages to build:"
           printf " - %s\n" "${PKGS[@]}"
 
+          # Check if luci feed is available for luci-app packages
+          LUCI_AVAILABLE=false
+          if [[ -f "feeds/luci/luci.mk" ]]; then
+            LUCI_AVAILABLE=true
+            echo "LuCI feed is available"
+          else
+            echo "WARNING: LuCI feed is not available - luci-app-* packages will be skipped"
+          fi
+
           # Build each package; keep going to show which ones fail
           FAILED_PACKAGES=()
           SKIPPED_PACKAGES=()
@@ -199,6 +208,14 @@ jobs:
           
           for p in "${PKGS[@]}"; do
             echo "::group::build $p"
+            
+            # Skip luci-app packages if luci feed is not available
+            if [[ "$p" == luci-app-* ]] && [[ "$LUCI_AVAILABLE" == "false" ]]; then
+              echo "SKIPPED: $p (LuCI feed not available in SDK)"
+              SKIPPED_PACKAGES+=("$p")
+              echo "::endgroup::"
+              continue
+            fi
             
             # Capture build output to check for dependency errors
             BUILD_LOG=$(mktemp)

@@ -17,7 +17,7 @@ define Package/luci-app-cpe
 	CATEGORY:=Daocaoren
 	SUBMENU :=CPE
 	TITLE:=luci-app-cpe
-	DEPENDS:=+sendat + luci-compat +kmod-usb-net  +kmod-usb-net-cdc-ether +kmod-usb-acm \
+	DEPENDS:=+sendat +luci-compat +kmod-usb-net  +kmod-usb-net-cdc-ether +kmod-usb-acm \
 		+kmod-usb-net-qmi-wwan  +kmod-usb-net-rndis +kmod-usb-serial-qualcomm \
 		+kmod-usb-net-sierrawireless +kmod-usb-ohci +kmod-usb-serial \
 		+kmod-usb-serial-option +kmod-usb-wdm \

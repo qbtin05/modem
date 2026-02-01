@@ -247,10 +247,13 @@ jobs:
           if-no-files-found: warn
 
       - name: Publish IPKs to Release
-        if: env.COPIED_PACKAGES != ''
+        if: env.COPIED_PACKAGES != '' && github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: openwrt-${{ env.OPENWRT_VERSION }}-${{ env.TARGET }}-${{ env.SUBTARGET }}-${{ github.run_number }}
+          name: OpenWrt ${{ env.OPENWRT_VERSION }} - ${{ env.TARGET }}/${{ env.SUBTARGET }} (Build ${{ github.run_number }})
           files: artifacts/*.ipk
           fail_on_unmatched_files: false
+          prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

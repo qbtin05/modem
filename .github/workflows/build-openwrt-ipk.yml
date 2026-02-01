@@ -154,7 +154,10 @@ jobs:
             fi
           done
 
-          ./scripts/feeds install -a
+          # Install packages from available feeds
+          # Note: SDK may not have all feeds (e.g., luci), so we ignore errors
+          ./scripts/feeds install -a || true
+          
           make defconfig
 
       - name: Build all detected local packages
